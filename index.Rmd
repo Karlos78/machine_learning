@@ -1,0 +1,114 @@
+---
+title: "Machine Learning"
+subtitle: "Bicep Curl Classification"
+author: "Karl"
+date: "Monday, March 14, 2016"
+output: html_document
+---
+
+### Synopsis
+
+Six participants were asked to perform repititions of a bicep curl whislt being monitored by four on-body sensors. They were asked to correctly perform the exercise and also to incorrectly perform the exercise in four different ways. The sensors collected information about how their arms, body and the dumbbell being lifted were moving during these exercises. 
+
+For more information see this website:
+
+http://groupware.les.inf.puc-rio.br/har
+
+Each set of collected measurements is associated with either the exercise being performed correctly, 'classe' = "A", or incorrectly, 'classe' = "B", "C", "D" or "E".
+
+The object of this exercise was to create a machine learning model which could accurately predict the 'classe' of an exercise from a set of measurements. Owing to the manner in which the data was collected, initially some data cleansing is performed. A random forest model is then constructed which predicts 'classe' with an accuracy of 99.4%. Finally, a simple partition model is also created, for comparison purposes.
+
+
+```{r packages, cache=TRUE, echo = FALSE}
+library(caret)
+library(ggplot2)
+library(Hmisc)
+library(GGally)
+library(dplyr)
+library(pROC)
+library(ROCR)
+```
+
+### Data Processing
+
+Two datasets have been provided for this exercise, 'training' and 'testing'. A summary of four of the columns of 
+training data is shown below.
+
+```{r data, cache = TRUE}
+testing <- read.csv("pml-testing.csv")
+training <- read.csv("pml-training.csv")
+summary(training[,10:13])
+```
+
+As can be seen, two of the columns of data have no NA values at all but two have 19,216 blank values. This is a pattern seen throughout the dataset with many variables consisting almost entirely of blank or NA values. As these are of no use to us in the modelling and prediction process, the columns which show this pattern are identified and removed from the data.
+
+
+```{r process, cache=TRUE}
+na.list <- names(colSums(is.na(training))[colSums(is.na(training))==19216])
+## get list of columns with lots of nas
+
+blank.list <- names(colSums(training == "")[colSums(training == "")==19216])
+blank.list <- blank.list[!is.na(blank.list)]
+## same for blanks
+
+remove.list <- c(na.list,blank.list)
+
+`%ni%` <- Negate(`%in%`)
+clean.training <- subset(training, select = names(training) %ni% remove.list)
+```
+
+Once the data is cleansed, 30% of the training data is set aside for validation purposes and the remainder kept to train the model.
+
+
+```{r split training, cache = TRUE}
+inTrain <- createDataPartition(y=training$classe, p = 0.7, list=FALSE)
+clean.training <- clean.training[inTrain,]
+clean.validation <- clean.training[-inTrain,]
+
+```
+
+### Modelling
+
+A random forest model was tried first. Parameters were set so that the random forest process used 5-fold cross validation in the model creation - this means that 80% of the training data is used to build a model and then tested on the remaining 20% to determine its accuracy. This process is repeated five times.
+
+Random forest was chosen as the method as it does not require the data to be centred and scaled and it can be very useful for classification problems.
+
+An alternate process of building five seperate, logistic models was considered (one for each outcome) which could then be combined into a single predictive model was considered. Logistic models can be useful as the co-efficients are interpreted as changes in odds of outcome based on one unit changes in a given variable. Unfortunately time constraints meant this approach was not completed for this report.
+
+In order to improve speed of processing, the number of candidate variables allowed to be randomly selected at each node in the decision tree was set to a maximum of eight.
+
+```{r model, cache = TRUE}
+ctrl <- trainControl(method="cv", classProbs=T, savePredictions = T, number = 5)
+grid = expand.grid(mtry=c(2,4,8))
+model.rf <- train(classe ~ ., data = clean.training[,8:60], method = "rf", trControl = ctrl, tuneGrid = grid)
+```
+
+The chart below shows that the difference in accuracy between using four and eight candidate variables at each node is negligable - around 99%, suggesting that of the 4,119 observations set aside as a validation data set we might expect 30 to be mis-classified by the model.
+
+```{r accuracy, cache = FALSE}
+plot(model.rf)
+```
+
+### Validation & Accuracy
+
+Now we can use the model created to predict the 'classe' outcomes on the validation data and compare them with the actual values using a confusion matrix. As can be seen in the output below, the model achieves 100% accuracy on this data set.
+
+```{r validation, cache = TRUE}
+clean.validation$classe.rf <- predict(model.rf, clean.validation[,8:59])
+confusionMatrix(clean.validation$classe, clean.validation$classe.rf)
+```
+
+### Partition Model Comparison
+
+The result above was fairly surprising, so an alternate partition model was built for comparison purposes. The information below shows that this simpler model only achieves an accuracy of around 50%.
+
+```{r rpart, cache = TRUE}
+model.rpart <- train(classe ~ ., data = clean.training[,8:60], method = "rpart")
+clean.validation$classe.rpart <- predict(model.rpart, clean.validation[,8:59])
+confusionMatrix(clean.validation$classe, clean.validation$classe.rpart)
+
+```
+
+### Conclusion
+
+A random forest model seems to do very well at predicting the manner in which an exercise was performed. The high accuracy raises concerns of over-fitting - further test data would be needed to investigate this further.
