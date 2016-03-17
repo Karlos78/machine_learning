@@ -66,62 +66,6 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p><a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a></p>
 <p>Each set of collected measurements is associated with either the exercise being performed correctly, ‘classe’ = “A”, or incorrectly, ‘classe’ = “B”, “C”, “D” or “E”.</p>
 <p>The object of this exercise was to create a machine learning model which could accurately predict the ‘classe’ of an exercise from a set of measurements. Owing to the manner in which the data was collected, initially some data cleansing is performed. A random forest model is then constructed which predicts ‘classe’ with an accuracy of 99.4%. Finally, a simple partition model is also created, for comparison purposes.</p>
-<pre><code>## Loading required package: lattice
-## Loading required package: ggplot2
-## Loading required package: grid
-## Loading required package: survival
-## Loading required package: splines
-## 
-## Attaching package: 'survival'
-## 
-## The following object is masked from 'package:caret':
-## 
-##     cluster
-## 
-## Loading required package: Formula
-## 
-## Attaching package: 'Hmisc'
-## 
-## The following objects are masked from 'package:base':
-## 
-##     format.pval, round.POSIXt, trunc.POSIXt, units
-## 
-## 
-## Attaching package: 'dplyr'
-## 
-## The following object is masked from 'package:GGally':
-## 
-##     nasa
-## 
-## The following objects are masked from 'package:Hmisc':
-## 
-##     src, summarize
-## 
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-## 
-## Type 'citation(&quot;pROC&quot;)' for a citation.
-## 
-## Attaching package: 'pROC'
-## 
-## The following objects are masked from 'package:stats':
-## 
-##     cov, smooth, var
-## 
-## Loading required package: gplots
-## KernSmooth 2.23 loaded
-## Copyright M. P. Wand 1997-2009
-## 
-## Attaching package: 'gplots'
-## 
-## The following object is masked from 'package:stats':
-## 
-##     lowess</code></pre>
 </div>
 <div id="data-processing" class="section level3">
 <h3>Data Processing</h3>

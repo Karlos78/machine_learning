@@ -18,17 +18,6 @@ Each set of collected measurements is associated with either the exercise being 
 
 The object of this exercise was to create a machine learning model which could accurately predict the 'classe' of an exercise from a set of measurements. Owing to the manner in which the data was collected, initially some data cleansing is performed. A random forest model is then constructed which predicts 'classe' with an accuracy of 99.4%. Finally, a simple partition model is also created, for comparison purposes.
 
-
-```{r packages, cache=TRUE, echo = FALSE}
-library(caret)
-library(ggplot2)
-library(Hmisc)
-library(GGally)
-library(dplyr)
-library(pROC)
-library(ROCR)
-```
-
 ### Data Processing
 
 Two datasets have been provided for this exercise, 'training' and 'testing'. A summary of four of the columns of 
